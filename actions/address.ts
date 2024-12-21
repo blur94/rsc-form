@@ -3,7 +3,7 @@
 import { z } from "zod";
 import type { ActionResponse, AddressFormData } from "@/types/address";
 
-const addressSchema = z.object({
+export const addressSchema = z.object({
   streetAddress: z.string().min(1, "Street address is required"),
   apartment: z.string().optional(),
   city: z.string().min(1, "City is required"),

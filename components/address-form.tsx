@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { submitAddress } from "@/actions/address";
+import { addressSchema, submitAddress } from "@/actions/address";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ActionResponse, AddressFormData } from "@/types/address";
 import { CheckCircle2 } from "lucide-react";
+import { useForm, zodResolver } from "@mantine/form";
 
 const initialState: ActionResponse = {
   success: false,
@@ -27,10 +28,24 @@ export default function AddressForm() {
     initialState
   );
 
-  const getValue = (
-    obj: "errors" | "inputs",
-    field: keyof AddressFormData
-  ): string => state?.[obj]?.[field] || "";
+  const form = useForm<AddressFormData>({
+    mode: "uncontrolled",
+    onSubmitPreventDefault: "validation-failed",
+    touchTrigger: "change",
+    initialValues: {
+      streetAddress: "",
+      apartment: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "",
+    },
+    validate: zodResolver(addressSchema),
+  });
+
+  const getValue = (field: keyof AddressFormData): string => {
+    return (form.errors[field] as string) || "";
+  };
 
   return (
     <Card className="w-full max-w-lg mx-auto my-auto">
@@ -41,7 +56,12 @@ export default function AddressForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={action} className="space-y-6" autoComplete="on">
+        <form
+          onSubmit={form.onSubmit(() => form.reset())}
+          action={action}
+          className="space-y-6"
+          autoComplete="on"
+        >
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="streetAddress">Street Address</Label>
@@ -49,19 +69,15 @@ export default function AddressForm() {
                 id="streetAddress"
                 name="streetAddress"
                 placeholder="123 Main St"
-                defaultValue={getValue("inputs", "streetAddress")}
-                // required
-                // minLength={5}
-                // maxLength={100}
+                {...form.getInputProps("streetAddress")}
+                key={form.key("streetAddress")}
                 autoComplete="street-address"
                 aria-describedby="streetAddress-error"
-                className={
-                  getValue("errors", "streetAddress") ? "'border-red-500'" : ""
-                }
+                className={getValue("streetAddress") ? "border-red-500" : ""}
               />
 
               <Error
-                message={getValue("errors", "streetAddress")}
+                message={getValue("streetAddress")}
                 field="streetAddress"
               />
             </div>
@@ -71,9 +87,9 @@ export default function AddressForm() {
               <Input
                 id="apartment"
                 name="apartment"
-                defaultValue={getValue("inputs", "apartment")}
+                {...form.getInputProps("apartment")}
+                key={form.key("apartment")}
                 placeholder="Apt 4B"
-                // maxLength={20}
                 autoComplete="address-line2"
                 aria-describedby="apartment-error"
               />
@@ -85,19 +101,15 @@ export default function AddressForm() {
                 <Input
                   id="city"
                   name="city"
-                  defaultValue={getValue("inputs", "city")}
+                  {...form.getInputProps("city")}
+                  key={form.key("city")}
                   placeholder="New York"
-                  // required
-                  // minLength={2}
-                  // maxLength={50}
                   autoComplete="address-level2"
                   aria-describedby="city-error"
-                  className={
-                    getValue("errors", "city") ? "border-red-500" : "''"
-                  }
+                  className={getValue("city") ? "border-red-500" : "''"}
                 />
 
-                <Error message={getValue("errors", "city")} field="city" />
+                <Error message={getValue("city")} field="city" />
               </div>
 
               <div className="space-y-2">
@@ -105,18 +117,17 @@ export default function AddressForm() {
                 <Input
                   id="state"
                   name="state"
-                  defaultValue={getValue("inputs", "state")}
+                  {...form.getInputProps("state")}
+                  key={form.key("state")}
                   placeholder="NY"
                   // required
                   // minLength={2}
                   // maxLength={50}
                   autoComplete="address-level1"
                   aria-describedby="state-error"
-                  className={
-                    getValue("errors", "state") ? "border-red-500" : "''"
-                  }
+                  className={getValue("state") ? "border-red-500" : ""}
                 />
-                <Error message={getValue("errors", "state")} field="state" />
+                <Error message={getValue("state")} field="state" />
               </div>
             </div>
 
@@ -126,21 +137,17 @@ export default function AddressForm() {
                 <Input
                   id="zipCode"
                   name="zipCode"
-                  defaultValue={getValue("inputs", "zipCode")}
+                  {...form.getInputProps("zipCode")}
+                  key={form.key("zipCode")}
                   placeholder="10001"
                   // required
                   // pattern="[0-9]{5}(-[0-9]{4})?"
                   // maxLength={10}
                   autoComplete="postal-code"
                   aria-describedby="zipCode-error"
-                  className={
-                    getValue("errors", "zipCode") ? "'border-red-500'" : ""
-                  }
+                  className={getValue("zipCode") ? "border-red-500" : ""}
                 />
-                <Error
-                  message={getValue("errors", "zipCode")}
-                  field="zipCode"
-                />
+                <Error message={getValue("zipCode")} field="zipCode" />
               </div>
 
               <div className="space-y-2">
@@ -148,21 +155,18 @@ export default function AddressForm() {
                 <Input
                   id="country"
                   name="country"
-                  defaultValue={getValue("inputs", "country")}
+                  defaultValue={getValue("country")}
+                  {...form.getInputProps("country")}
+                  key={form.key("country")}
                   placeholder="United States"
                   // required
                   // minLength={2}
                   // maxLength={56}
                   autoComplete="country-name"
                   aria-describedby="country-error"
-                  className={
-                    getValue("errors", "country") ? "'border-red-500'" : ""
-                  }
+                  className={getValue("country") ? "border-red-500" : ""}
                 />
-                <Error
-                  message={getValue("errors", "country")}
-                  field="country"
-                />
+                <Error message={getValue("country")} field="country" />
               </div>
             </div>
           </div>
